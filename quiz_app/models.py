@@ -45,7 +45,7 @@ class Question(models.Model):
     option_e = models.CharField(max_length=200, blank=True)
     
     # Correct answers
-    correct_answer = models.TextField()  # For text answers or comma-separated for multiple choice
+    correct_answer = models.TextField(null=True, blank=True)  # For text answers or comma-separated for multiple choice
     correct_boolean = models.BooleanField(null=True, blank=True)  # For boolean questions
     
     created_at = models.DateTimeField(auto_now_add=True)
