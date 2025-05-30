@@ -1,0 +1,97 @@
+<!-- Dashboard Template -->
+<!-- templates/quiz_app/dashboard.html -->
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Quiz App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card quiz-card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-play-circle fa-3x mb-3"></i>
+                                <h5>Take a Quiz</h5>
+                                <p>Test your programming knowledge</p>
+                                <a href="{% url 'quiz_selection' %}" class="btn btn-light btn-custom">
+                                    Start Quiz <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card quiz-card bg-success text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                <h5>View Results</h5>
+                                <p>Check all quiz results</p>
+                                <a href="{% url 'results_table' %}" class="btn btn-light btn-custom">
+                                    View Results <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card quiz-card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-code fa-3x mb-3"></i>
+                                <h5>Languages</h5>
+                                <p>Python, Java, JavaScript, SQL, C++</p>
+                                <span class="badge bg-light text-dark">5 Languages</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if recent_results %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h4><i class="fas fa-clock"></i> Recent Quiz Results</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Language</th>
+                                <th>Difficulty</th>
+                                <th>Score</th>
+                                <th>Time Taken</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in recent_results %}
+                            <tr>
+                                <td><span class="badge bg-info">{{ result.language }}</span></td>
+                                <td><span class="badge bg-secondary">{{ result.difficulty }}</span></td>
+                                <td>
+                                    <span class="badge {% if result.score >= 7 %}bg-success{% elif result.score >= 5 %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ result.score }}/10
+                                    </span>
+                                </td>
+                                <td>{{ result.get_time_display }}</td>
+                                <td>{{ result.completed_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
