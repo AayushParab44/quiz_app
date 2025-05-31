@@ -14,10 +14,10 @@ class CustomUserCreationForm(UserCreationForm):
         user = super().save(commit=False)
         if commit:
             user.save()
-            QuizUser.objects.create(
-                user=user,
-                name=self.cleaned_data['name']
-            )
+        #     QuizUser.objects.create(
+        #         user=user,
+        #         name=self.cleaned_data['name']
+        #     )
         return user
 
 class QuizSelectionForm(forms.Form):

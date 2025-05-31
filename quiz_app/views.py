@@ -15,19 +15,33 @@ from django.http import HttpResponse
 def home(request):
     return HttpResponse("Hello, Quiz App!")
 
+
 def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Ensure a QuizUser is created for the new user if not then create one
-            QuizUser.objects.get_or_create(user=user)
+            # REMOVE this line:
+            # QuizUser.objects.get_or_create(user=user)
             login(request, user)
             messages.success(request, 'Registration successful!')
             return redirect('dashboard')
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
+# def register_view(request):
+#     if request.method == 'POST':
+#         form = CustomUserCreationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             # Ensure a QuizUser is created for the new user if not then create one
+#             QuizUser.objects.get_or_create(user=user)
+#             login(request, user)
+#             messages.success(request, 'Registration successful!')
+#             return redirect('dashboard')
+#     else:
+#         form = CustomUserCreationForm()
+#     return render(request, 'registration/register.html', {'form': form})
 
 @login_required
 def dashboard_view(request):
