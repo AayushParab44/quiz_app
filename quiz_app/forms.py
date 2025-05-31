@@ -52,17 +52,34 @@ class QuizAnswerForm(forms.Form):
                 )
             elif question.question_type == 'single_choice':
                 choices = []
-                if question.option_a: choices.append(('A', question.option_a))
-                if question.option_b: choices.append(('B', question.option_b))
-                if question.option_c: choices.append(('C', question.option_c))
-                if question.option_d: choices.append(('D', question.option_d))
-                if question.option_e: choices.append(('E', question.option_e))
-                
+                if question.option_a:
+                    choices.append(('A', question.option_a))
+                if question.option_b:
+                    choices.append(('B', question.option_b))
+                if question.option_c:
+                    choices.append(('C', question.option_c))
+                if question.option_d:
+                    choices.append(('D', question.option_d))
+                if question.option_e:
+                    choices.append(('E', question.option_e))
                 self.fields[field_name] = forms.ChoiceField(
                     choices=choices,
-                    widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+                    widget=forms.RadioSelect,
                     required=False
                 )
+            # elif question.question_type == 'single_choice':
+            #     choices = []
+            #     if question.option_a: choices.append(('A', question.option_a))
+            #     if question.option_b: choices.append(('B', question.option_b))
+            #     if question.option_c: choices.append(('C', question.option_c))
+            #     if question.option_d: choices.append(('D', question.option_d))
+            #     if question.option_e: choices.append(('E', question.option_e))
+                
+            #     self.fields[field_name] = forms.ChoiceField(
+            #         choices=choices,
+            #         widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+            #         required=False
+            #     )
             elif question.question_type == 'multiple_choice':
                 choices = []
                 if question.option_a: choices.append(('A', question.option_a))

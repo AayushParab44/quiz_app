@@ -30,10 +30,12 @@
                             
                             {% if question.question_type == 'boolean' %}
                                 <div class="form-check">
-                                    {{ form.fields.question_|add:question.id }}
-                                    <label class="form-check-label">
-                                        True/False (Check for True)
-                                    </label>
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="True" id="q{{ question.id }}_true">
+                                    <label class="form-check-label" for="q{{ question.id }}_true">True</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="False" id="q{{ question.id }}_false">
+                                    <label class="form-check-label" for="q{{ question.id }}_false">False</label>
                                 </div>
                             
                             {% elif question.question_type == 'single_choice' %}

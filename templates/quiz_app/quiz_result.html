@@ -1,0 +1,126 @@
+<!-- Quiz Result Template -->
+<!-- templates/quiz_app/quiz_result.html -->
+{% extends 'base.html' %}
+
+{% block title %}Quiz Results{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header {% if score >= 7 %}bg-success{% elif score >= 5 %}bg-warning{% else %}bg-danger{% endif %} text-white text-center">
+                <h2><i class="fas fa-trophy"></i> Quiz Completed!</h2>
+                <h3>{{ language }} - {{ difficulty }} Level</h3>
+            </div>
+            <div class="card-body text-center">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4><i class="fas fa-bullseye"></i> Score</h4>
+                                <h2 class="{% if score >= 7 %}text-success{% elif score >= 5 %}text-warning{% else %}text-danger{% endif %}">
+                                    {{ score }}/{{ total }}
+                                </h2>
+                                <p class="mb-0">
+                                    {% if score >= 8 %}
+                                        <span class="badge bg-success">Excellent!</span>
+                                    {% elif score >= 6 %}
+                                        <span class="badge bg-warning">Good Job!</span>
+                                    {% elif score >= 4 %}
+                                        <span class="badge bg-info">Keep Trying!</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Need Practice</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4><i class="fas fa-clock"></i> Time Taken</h4>
+                                <h2 class="text-info">
+                                    <h2 class="text-info">
+                                        {{ minutes }}m {{ seconds }}s
+                                    </h2>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4><i class="fas fa-percentage"></i> Percentage</h4>
+                                <h2 class="{% if score >= 7 %}text-success{% elif score >= 5 %}text-warning{% else %}text-danger{% endif %}">
+                                    {{ percentage }}%
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'dashboard' %}" class="btn btn-primary btn-custom me-2">
+            <i class="fas fa-home"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'quiz_selection' %}" class="btn btn-success btn-custom me-2">
+            <i class="fas fa-redo"></i> Take Another Quiz
+        </a>
+        <a href="{% url 'results_table' %}" class="btn btn-info btn-custom">
+            <i class="fas fa-chart-bar"></i> View All Results
+        </a>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4>Question Review</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for item in results %}
+                        <li class="list-group-item">
+                            <strong>Q{{ forloop.counter }}:</strong> {{ item.question_text }}<br>
+                            <span>
+                                <strong>Your answer:</strong>
+                                {% if item.user_answer %}
+                                    {% if item.question_type == 'multiple_choice' %}
+                                        {{ item.user_answer|join:", " }}
+                                    {% else %}
+                                        {{ item.user_answer }}
+                                    {% endif %}
+                                {% else %}
+                                    <em>Not answered</em>
+                                {% endif %}
+                            </span><br>
+                            <span>
+                                <strong>Correct answer:</strong>
+                                {% if item.question_type == 'multiple_choice' %}
+                                    {{ item.correct_answer }}
+                                {% elif item.question_type == 'boolean' %}
+                                    {{ item.correct_boolean }}
+                                {% else %}
+                                    {{ item.correct_answer }}
+                                {% endif %}
+                            </span>
+                            {% if item.correct %}
+                                <span class="badge bg-success">Correct</span>
+                            {% else %}
+                                <span class="badge bg-danger">Incorrect</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -79,3 +79,13 @@ class QuizSession(models.Model):
     
     def __str__(self):
         return f"{self.user.name} - {self.language} ({self.difficulty})"
+    
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+
+@receiver(post_save, sender=User)
+def create_quiz_user(sender, instance, created, **kwargs):
+    if created:
+        QuizUser.objects.get_or_create(user=instance, name=instance.username)

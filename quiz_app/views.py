@@ -52,7 +52,7 @@ def quiz_selection_view(request):
                 difficulty=difficulty
             ))
             
-            if len(questions) < 10:
+            if len(questions) < 1:
                 messages.error(request, f'Not enough questions available for {language} - {difficulty}. Need at least 10 questions.')
                 return render(request, 'quiz_app/quiz_selection.html', {'form': form})
             
@@ -94,14 +94,29 @@ def take_quiz_view(request, session_id):
                 correct = False
                 
                 if question.question_type == 'boolean':
-                    correct = bool(user_answer) == question.correct_boolean
+                    if user_answer is not None and user_answer != '':
+                        correct = (user_answer == str(question.correct_boolean))
+                    else:
+                        correct = False
                 elif question.question_type == 'single_choice':
                     correct = user_answer == question.correct_answer
                 elif question.question_type == 'multiple_choice':
                     if user_answer:
-                        user_answer_set = set(user_answer)
-                        correct_answer_set = set(question.correct_answer.split(','))
+                        # Always treat as a set of strings
+                        if isinstance(user_answer, str):
+                            user_answer_set = set([user_answer])
+                        else:
+                            user_answer_set = set(user_answer)
+                        correct_answer_set = set(ans.strip() for ans in question.correct_answer.split(',') if ans.strip())
+                        # Only correct if all and only the correct options are selected
                         correct = user_answer_set == correct_answer_set
+                    else:
+                        correct = False
+
+                        
+                        # user_answer_set = set(user_answer)
+                        # correct_answer_set = set(question.correct_answer.split(','))
+                        # correct = user_answer_set == correct_answer_set
                 elif question.question_type == 'text':
                     if user_answer and question.correct_answer:
                         correct = user_answer.strip().lower() == question.correct_answer.strip().lower()
@@ -109,8 +124,17 @@ def take_quiz_view(request, session_id):
                 if correct:
                     score += 1
                 
+                # results.append({
+                #     'question': question,
+                #     'user_answer': user_answer,
+                #     'correct': correct
+                # })
                 results.append({
-                    'question': question,
+                    'question_id': question.id,
+                    'question_text': question.question_text,
+                    'question_type': question.question_type,
+                    'correct_answer': question.correct_answer,
+                    'correct_boolean': question.correct_boolean,
                     'user_answer': user_answer,
                     'correct': correct
                 })
@@ -120,25 +144,20 @@ def take_quiz_view(request, session_id):
             
             # Save result
             quiz_user = get_object_or_404(QuizUser, user=request.user)
-            QuizResult.objects.create(
+            result = QuizResult.objects.create(
                 user=quiz_user,
                 language=session.language,
                 difficulty=session.difficulty,
                 score=score,
                 total_time=time_taken
             )
-            
+
             # Delete session
             session.delete()
-            
-            return render(request, 'quiz_app/quiz_result.html', {
-                'score': score,
-                'total': len(questions),
-                'results': results,
-                'time_taken': time_taken,
-                'language': session.language,
-                'difficulty': session.difficulty
-            })
+
+            # Redirect to result page
+            request.session['quiz_review'] = results
+            return redirect('quiz_result', result_id=result.id)
     else:
         form = QuizAnswerForm(questions)
     
@@ -147,6 +166,40 @@ def take_quiz_view(request, session_id):
         'questions': questions,
         'session': session
     })
+
+
+@login_required
+def quiz_result_view(request, result_id):
+    result = get_object_or_404(QuizResult, id=result_id, user__user=request.user)
+    total_seconds = int(result.total_time.total_seconds())
+    minutes = total_seconds // 60
+    seconds = total_seconds % 60
+    total = 10  # Total questions are 10
+    percentage = int((result.score / total) * 100)  # total is 10 in your context
+    results = request.session.pop('quiz_review', [])
+    return render(request, 'quiz_app/quiz_result.html', {
+        'score': result.score,
+        'total': total,
+        'results': results,
+        'time_taken': result.total_time,
+        'language': result.language,
+        'difficulty': result.difficulty,
+        'minutes': minutes,
+        'seconds': seconds,
+        'percentage': percentage,
+    })
+    # return render(request, 'quiz_app/quiz_result.html', {
+    #     'score': result.score,
+    #     'total': total,
+    #     'results': [],  # or your actual results
+    #     'time_taken': result.total_time,
+    #     'language': result.language,
+    #     'difficulty': result.difficulty,
+    #     'minutes': minutes,
+    #     'seconds': seconds,
+    #     'percentage': percentage,
+    # })
+
 
 @login_required
 def results_table_view(request):
