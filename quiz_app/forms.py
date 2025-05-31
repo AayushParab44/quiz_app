@@ -46,9 +46,10 @@ class QuizAnswerForm(forms.Form):
             field_name = f'question_{question.id}'
             
             if question.question_type == 'boolean':
-                self.fields[field_name] = forms.BooleanField(
-                    required=False,
-                    widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+                self.fields[field_name] = forms.ChoiceField(
+                    choices=[('True', 'True'), ('False', 'False')],
+                    widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+                    required=True
                 )
             elif question.question_type == 'single_choice':
                 choices = []
