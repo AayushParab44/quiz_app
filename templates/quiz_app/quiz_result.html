@@ -21,6 +21,12 @@
                                 <h2 class="{% if score >= 7 %}text-success{% elif score >= 5 %}text-warning{% else %}text-danger{% endif %}">
                                     {{ score }}/{{ total }}
                                 </h2>
+
+                                <p class="mb-0">
+                                    <span class="badge bg-primary">Attempted: {{ attempted }}</span>
+                                    <span class="badge bg-secondary">Unattempted: {{ unattempted }}</span>
+                                </p>
+
                                 <p class="mb-0">
                                     {% if score >= 8 %}
                                         <span class="badge bg-success">Excellent!</span>
