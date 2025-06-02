@@ -231,6 +231,12 @@ def take_quiz_view(request, session_id):
                     elif question.question_type == 'text':
                         if user_answer and question.correct_answer:
                             correct = user_answer.strip().lower() == question.correct_answer.strip().lower()
+
+                            '''
+                            
+                            '''
+
+
                         else:
                             correct = False
                     if correct:
