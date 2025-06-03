@@ -210,14 +210,21 @@ def take_quiz_view(request, session_id):
                 for idx, question in enumerate(questions):
                     user_answer = answers.get(str(question.id))
                     correct = False
-                    # ... (your existing answer checking logic here) ...
+                    score_increment = 0
+
                     if question.question_type == 'boolean':
                         if user_answer is not None and user_answer != '':
                             correct = (user_answer == str(question.correct_boolean))
                         else:
                             correct = False
+                        if correct:
+                            score_increment = 1
+
                     elif question.question_type == 'single_choice':
                         correct = user_answer == question.correct_answer
+                        if correct:
+                            score_increment = 1
+
                     elif question.question_type == 'multiple_choice':
                         if user_answer:
                             if isinstance(user_answer, str):
@@ -228,19 +235,25 @@ def take_quiz_view(request, session_id):
                             correct = user_answer_set == correct_answer_set
                         else:
                             correct = False
+                        if correct:
+                            score_increment = 1
+
                     elif question.question_type == 'text':
                         if user_answer and question.correct_answer:
                             correct = user_answer.strip().lower() == question.correct_answer.strip().lower()
-
-                            '''
-                            
-                            '''
-
-
+                            s1 = user_answer.strip().lower().split()
+                            s2 = question.correct_answer.strip().lower().split()
+                            words1 = set(s1)
+                            words2 = set(s2)
+                            matching_words = words1.intersection(words2)
+                            score_increment = len(matching_words) / len(s2) if len(s2) > 0 else 0
                         else:
                             correct = False
-                    if correct:
-                        score += 1
+                            score_increment = 0
+
+                    score += score_increment
+                    # print(score)
+
                     results.append({
                         'question_id': question.id,
                         'question_text': question.question_text,
@@ -250,8 +263,56 @@ def take_quiz_view(request, session_id):
                         'user_answer': user_answer,
                         'correct': correct
                     })
+                # for idx, question in enumerate(questions):
+                #     user_answer = answers.get(str(question.id))
+                #     correct = False
+                #     # ... (your existing answer checking logic here) ...
+                #     if question.question_type == 'boolean':
+                #         if user_answer is not None and user_answer != '':
+                #             correct = (user_answer == str(question.correct_boolean))
+                #         else:
+                #             correct = False
+                #     elif question.question_type == 'single_choice':
+                #         correct = user_answer == question.correct_answer
+                #     elif question.question_type == 'multiple_choice':
+                #         if user_answer:
+                #             if isinstance(user_answer, str):
+                #                 user_answer_set = set([user_answer])
+                #             else:
+                #                 user_answer_set = set(user_answer)
+                #             correct_answer_set = set(ans.strip() for ans in question.correct_answer.split(',') if ans.strip())
+                #             correct = user_answer_set == correct_answer_set
+                #         else:
+                #             correct = False
+                #     elif question.question_type == 'text':
+                #         if user_answer and question.correct_answer:
+                #             correct = user_answer.strip().lower() == question.correct_answer.strip().lower()
+                #             s1= user_answer.strip().lower().split()
+                #             s2= question.correct_answer.strip().lower().split()
+                #             # Calculate score based on matching words
+                #             words1 = set(s1)
+                #             words2 = set(s2)
+                #             matching_words = words1.intersection(words2)
+                #             score += len(matching_words)/len(s2)
+                #             print(score)
+                #             # continue
+
+                #         else:
+                #             correct = False
+                #     if correct and question.question_type != 'text':
+                #         score += 1
+                #     results.append({
+                #         'question_id': question.id,
+                #         'question_text': question.question_text,
+                #         'question_type': question.question_type,
+                #         'correct_answer': question.correct_answer,
+                #         'correct_boolean': question.correct_boolean,
+                #         'user_answer': user_answer,
+                #         'correct': correct
+                #     })
                 time_taken = timezone.now() - session.start_time
                 quiz_user = get_object_or_404(QuizUser, user=request.user)
+                # print('Score=',score)
                 result = QuizResult.objects.create(
                     user=quiz_user,
                     language=session.language,
@@ -285,6 +346,7 @@ def quiz_result_view(request, result_id):
     minutes = total_seconds // 60
     seconds = total_seconds % 60
     total = 10  # Total questions are 10
+    # print(result.score)
     percentage = int((result.score / total) * 100)  # total is 10 in your context
     results = request.session.pop('quiz_review', [])
     attempted = sum(
@@ -292,6 +354,7 @@ def quiz_result_view(request, result_id):
     if item['user_answer'] not in [None, '', [], {}]
     )
     unattempted = len(results) - attempted
+    # print(result.score)
     return render(request, 'quiz_app/quiz_result.html', {
         'score': result.score,
         'total': total,
@@ -316,6 +379,7 @@ def results_table_view(request):
 def results_data_view(request):
     results = QuizResult.objects.all().order_by('-completed_at')
     data = []
+    # print(result.score)
     for result in results:
         data.append({
             'id': result.id,

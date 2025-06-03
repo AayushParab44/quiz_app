@@ -57,7 +57,7 @@ class QuizResult(models.Model):
     user = models.ForeignKey(QuizUser, on_delete=models.CASCADE)
     language = models.CharField(max_length=20)
     difficulty = models.CharField(max_length=10)
-    score = models.IntegerField()
+    score = models.FloatField()
     total_time = models.DurationField()  # Time taken to complete quiz
     completed_at = models.DateTimeField(auto_now_add=True)
     
@@ -89,3 +89,41 @@ from django.contrib.auth.models import User
 def create_quiz_user(sender, instance, created, **kwargs):
     if created:
         QuizUser.objects.get_or_create(user=instance, name=instance.username)
+
+
+
+
+#Try to implement these-
+# M2M (Many-to-Many)
+# How it is defined?
+# How to access?
+# Through Table?
+
+
+# class Question:
+#     # Options for multiple choice questions
+
+
+# class Option:
+#     answer_text = models.CharField(max_length=200, blank=True)
+#     answer_seq = models.IntegerField() # optional
+#     question = models.Foreignkey(Question, related_name='answers')
+#     is_correct = Foreignkey
+
+
+
+# Question(id=1, question_text='WHat is Python?', opt1='Dynamic Programming Language', opt2='Not Object oriented')
+
+# Option:
+# Option(id=1, question=Question(id=1), answer_text='Dynamic Programming Language', is_correct=True)
+# Option(id=2, question=Question(id=1), answer_text='Not Object oriented', is_correct=False)
+
+
+# Approach 2:
+
+# Question:
+#     options = manytoMany()
+
+
+
+# M2M -> Question_Options
