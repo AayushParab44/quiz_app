@@ -29,19 +29,6 @@ def register_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
-# def register_view(request):
-#     if request.method == 'POST':
-#         form = CustomUserCreationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             # Ensure a QuizUser is created for the new user if not then create one
-#             QuizUser.objects.get_or_create(user=user)
-#             login(request, user)
-#             messages.success(request, 'Registration successful!')
-#             return redirect('dashboard')
-#     else:
-#         form = CustomUserCreationForm()
-#     return render(request, 'registration/register.html', {'form': form})
 
 @login_required
 def dashboard_view(request):
@@ -71,7 +58,7 @@ def quiz_selection_view(request):
                 return render(request, 'quiz_app/quiz_selection.html', {'form': form})
             
             # Select 10 random questions
-            selected_questions = random.sample(questions, 10)
+            selected_questions = random.sample(questions, 5)
             question_ids = [q.id for q in selected_questions]
             
             # Create quiz session
@@ -89,97 +76,6 @@ def quiz_selection_view(request):
     
     return render(request, 'quiz_app/quiz_selection.html', {'form': form})
 
-# @login_required
-# def take_quiz_view(request, session_id):
-#     session = get_object_or_404(QuizSession, id=session_id, user__user=request.user)
-#     question_ids = json.loads(session.questions)
-#     questions = Question.objects.filter(id__in=question_ids)
-    
-#     if request.method == 'POST':
-#         form = QuizAnswerForm(questions, request.POST)
-#         if form.is_valid():
-#             # Calculate score
-#             score = 0
-#             results = []
-            
-#             for question in questions:
-#                 field_name = f'question_{question.id}'
-#                 user_answer = form.cleaned_data.get(field_name)
-#                 correct = False
-                
-#                 if question.question_type == 'boolean':
-#                     if user_answer is not None and user_answer != '':
-#                         correct = (user_answer == str(question.correct_boolean))
-#                     else:
-#                         correct = False
-#                 elif question.question_type == 'single_choice':
-#                     correct = user_answer == question.correct_answer
-#                 elif question.question_type == 'multiple_choice':
-#                     if user_answer:
-#                         # Always treat as a set of strings
-#                         if isinstance(user_answer, str):
-#                             user_answer_set = set([user_answer])
-#                         else:
-#                             user_answer_set = set(user_answer)
-#                         correct_answer_set = set(ans.strip() for ans in question.correct_answer.split(',') if ans.strip())
-#                         # Only correct if all and only the correct options are selected
-#                         correct = user_answer_set == correct_answer_set
-#                     else:
-#                         correct = False
-
-                        
-#                         # user_answer_set = set(user_answer)
-#                         # correct_answer_set = set(question.correct_answer.split(','))
-#                         # correct = user_answer_set == correct_answer_set
-#                 elif question.question_type == 'text':
-#                     if user_answer and question.correct_answer:
-#                         correct = user_answer.strip().lower() == question.correct_answer.strip().lower()
-                
-#                 if correct:
-#                     score += 1
-                
-#                 # results.append({
-#                 #     'question': question,
-#                 #     'user_answer': user_answer,
-#                 #     'correct': correct
-#                 # })
-#                 results.append({
-#                     'question_id': question.id,
-#                     'question_text': question.question_text,
-#                     'question_type': question.question_type,
-#                     'correct_answer': question.correct_answer,
-#                     'correct_boolean': question.correct_boolean,
-#                     'user_answer': user_answer,
-#                     'correct': correct
-#                 })
-            
-#             # Calculate time taken
-#             time_taken = timezone.now() - session.start_time
-            
-#             # Save result
-#             quiz_user = get_object_or_404(QuizUser, user=request.user)
-#             result = QuizResult.objects.create(
-#                 user=quiz_user,
-#                 language=session.language,
-#                 difficulty=session.difficulty,
-#                 score=score,
-#                 total_time=time_taken
-#             )
-
-#             # Delete session
-#             session.delete()
-
-#             # Redirect to result page
-#             request.session['quiz_review'] = results
-#             return redirect('quiz_result', result_id=result.id)
-#     else:
-#         form = QuizAnswerForm(questions)
-    
-#     return render(request, 'quiz_app/take_quiz.html', {
-#         'form': form,
-#         'questions': questions,
-#         'session': session
-#     })
 
 @login_required
 def take_quiz_view(request, session_id):
@@ -263,53 +159,7 @@ def take_quiz_view(request, session_id):
                         'user_answer': user_answer,
                         'correct': correct
                     })
-                # for idx, question in enumerate(questions):
-                #     user_answer = answers.get(str(question.id))
-                #     correct = False
-                #     # ... (your existing answer checking logic here) ...
-                #     if question.question_type == 'boolean':
-                #         if user_answer is not None and user_answer != '':
-                #             correct = (user_answer == str(question.correct_boolean))
-                #         else:
-                #             correct = False
-                #     elif question.question_type == 'single_choice':
-                #         correct = user_answer == question.correct_answer
-                #     elif question.question_type == 'multiple_choice':
-                #         if user_answer:
-                #             if isinstance(user_answer, str):
-                #                 user_answer_set = set([user_answer])
-                #             else:
-                #                 user_answer_set = set(user_answer)
-                #             correct_answer_set = set(ans.strip() for ans in question.correct_answer.split(',') if ans.strip())
-                #             correct = user_answer_set == correct_answer_set
-                #         else:
-                #             correct = False
-                #     elif question.question_type == 'text':
-                #         if user_answer and question.correct_answer:
-                #             correct = user_answer.strip().lower() == question.correct_answer.strip().lower()
-                #             s1= user_answer.strip().lower().split()
-                #             s2= question.correct_answer.strip().lower().split()
-                #             # Calculate score based on matching words
-                #             words1 = set(s1)
-                #             words2 = set(s2)
-                #             matching_words = words1.intersection(words2)
-                #             score += len(matching_words)/len(s2)
-                #             print(score)
-                #             # continue
-
-                #         else:
-                #             correct = False
-                #     if correct and question.question_type != 'text':
-                #         score += 1
-                #     results.append({
-                #         'question_id': question.id,
-                #         'question_text': question.question_text,
-                #         'question_type': question.question_type,
-                #         'correct_answer': question.correct_answer,
-                #         'correct_boolean': question.correct_boolean,
-                #         'user_answer': user_answer,
-                #         'correct': correct
-                #     })
+               
                 time_taken = timezone.now() - session.start_time
                 quiz_user = get_object_or_404(QuizUser, user=request.user)
                 # print('Score=',score)

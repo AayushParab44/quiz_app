@@ -14,7 +14,6 @@ class CustomUserCreationForm(UserCreationForm):
         user = super().save(commit=False)
         if commit:
             user.save()
-
         return user
 
 class QuizSelectionForm(forms.Form):
@@ -38,10 +37,8 @@ class QuizSelectionForm(forms.Form):
 class QuizAnswerForm(forms.Form):
     def __init__(self, questions, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        for i, question in enumerate(questions):
+        for question in questions:
             field_name = f'question_{question.id}'
-            
             if question.question_type == 'boolean':
                 self.fields[field_name] = forms.ChoiceField(
                     choices=[('True', 'True'), ('False', 'False')],
@@ -49,31 +46,15 @@ class QuizAnswerForm(forms.Form):
                     required=False
                 )
             elif question.question_type == 'single_choice':
-                choices = []
-                if question.option_a:
-                    choices.append(('A', question.option_a))
-                if question.option_b:
-                    choices.append(('B', question.option_b))
-                if question.option_c:
-                    choices.append(('C', question.option_c))
-                if question.option_d:
-                    choices.append(('D', question.option_d))
-                if question.option_e:
-                    choices.append(('E', question.option_e))
+                # Use Option model for choices
+                choices = [(str(opt.id), opt.answer_text) for opt in question.options.all()]
                 self.fields[field_name] = forms.ChoiceField(
                     choices=choices,
-                    widget=forms.RadioSelect,
+                    widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
                     required=False
                 )
-
             elif question.question_type == 'multiple_choice':
-                choices = []
-                if question.option_a: choices.append(('A', question.option_a))
-                if question.option_b: choices.append(('B', question.option_b))
-                if question.option_c: choices.append(('C', question.option_c))
-                if question.option_d: choices.append(('D', question.option_d))
-                if question.option_e: choices.append(('E', question.option_e))
-                
+                choices = [(str(opt.id), opt.answer_text) for opt in question.options.all()]
                 self.fields[field_name] = forms.MultipleChoiceField(
                     choices=choices,
                     widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
@@ -84,3 +65,5 @@ class QuizAnswerForm(forms.Form):
                     widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
                     required=False
                 )
+
+
